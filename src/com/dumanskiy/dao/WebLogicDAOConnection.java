@@ -1,62 +1,71 @@
 package com.dumanskiy.dao;
 
 import com.dumanskiy.entities.Student;
-import oracle.jdbc.driver.OracleDriver;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
-public class OracleDAOConnection implements DAOConnection {
+public class WebLogicDAOConnection implements DAOConnection {
 
-    private static OracleDAOConnection oracleDAOConnection;
-
+    private static WebLogicDAOConnection webLogicDAOConnection;
     private Connection connection;
     private Statement statement;
     private ResultSet resultSet;
-
-    private OracleDAOConnection () {
+    private WebLogicDAOConnection() {
         super();
     }
-
-    public static OracleDAOConnection getInstance() {
-        if (oracleDAOConnection == null) {
-            oracleDAOConnection = new OracleDAOConnection();
+    public static WebLogicDAOConnection getInstance() {
+        if (webLogicDAOConnection == null) {
+            webLogicDAOConnection = new WebLogicDAOConnection();
         }
-        return oracleDAOConnection;
+        return webLogicDAOConnection;
     }
-
 
     @Override
     public void connect() {
-        Driver driver = new OracleDriver();
+        String sp = "weblogic.jndi.WLInitialContextFactory";
+        String file = "t3://localhost:7001";
+        String dataSourceName = "AjaxTestJNDI";
+        Hashtable env = new Hashtable();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, sp);
+        env.put(Context.PROVIDER_URL, file);
+        Context ctx = null;
+        DataSource ds = null;
         try {
-            DriverManager.registerDriver(driver);
-            connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "system", "student");
-            if (!connection.isClosed()) {
-                System.out.println("Connected successful!");
-            }
+            ctx = new InitialContext(env);
+            ds = (DataSource) ctx.lookup(dataSourceName);
+        } catch (NamingException e) {
+
+            e.printStackTrace();
+        }
+        connection = null;
+        try {
+            connection = ds.getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-    }
+        if (connection != null) {
+            System.out.println("Connected successful!");
+        }
+}
 
     @Override
     public void disconnect() {
         try {
             connection.close();
-            if (resultSet != null) {
-                resultSet.close();
-            }
+            resultSet.close();
             statement.close();
-            System.out.println("Connection was closed");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    //---------READ-------------
     @Override
     public List<Student> selectAllStudents() {
         connect();
@@ -118,8 +127,6 @@ public class OracleDAOConnection implements DAOConnection {
         }
         disconnect();
     }
-
-
     private Student parseStudent(ResultSet resultSet) {
         Student student = null;
         try {
@@ -132,5 +139,4 @@ public class OracleDAOConnection implements DAOConnection {
         }
         return student;
     }
-
 }

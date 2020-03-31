@@ -3,6 +3,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="com.dumanskiy.dao.OracleDAOConnection" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="com.dumanskiy.dao.WebLogicDAOConnection" %>
 <%--
   Created by IntelliJ IDEA.
   User: olbe0615
@@ -18,7 +19,7 @@
   <body>
   <%String name = request.getParameter("val");
     List<Student> studentList
-            = OracleDAOConnection.getInstance().selectAllStudents();
+            = WebLogicDAOConnection.getInstance().selectAllStudents();
     if (name == null || name.trim().equals("")) {%>
         <p>Please enter name!</p>
   <%} else {

@@ -1,10 +1,11 @@
 package com.dumanskiy;
 
-import com.dumanskiy.dao.OracleDAOConnection;
+import com.dumanskiy.dao.DAOConnection;
+import com.dumanskiy.dao.WebLogicDAOConnection;
 
 public class Test {
     public static void main(String[] args) {
-        OracleDAOConnection.getInstance().deleteStudent(41);
-        OracleDAOConnection.getInstance().deleteStudent(42);
+        DAOConnection daoConnection = WebLogicDAOConnection.getInstance();
+        daoConnection.connect();
     }
 }
